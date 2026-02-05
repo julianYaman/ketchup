@@ -1,9 +1,43 @@
+# Dependencies
 node_modules
+
+# Build outputs
 build
 .svelte-kit
+
+# Version control
 .git
 .gitignore
+
+# Documentation
 *.md
+LICENSE
+
+# Logs
 *.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.*
+.env.local
+.env.*.local
+
+# OS files
 .DS_Store
-.env*
+Thumbs.db
+
+# IDE/Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
