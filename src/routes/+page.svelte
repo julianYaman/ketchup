@@ -212,7 +212,10 @@
 
 <svelte:head>
 	<title>{pageTitle}</title>
-	<meta name="description" content="A simple, playful Pomodoro timer with Picture-in-Picture support. Have your timer always visible while you work." />
+	<meta name="description" content="A simple Pomodoro timer. Pop out the timer into a Picture-in-Picture window to have your timer always visible while you work." />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<!-- Analytics -->
 	<script defer src="https://cloud.umami.is/script.js" data-website-id="6e2a3b0d-6caa-4ed6-acc2-2075d903214c"></script>
 </svelte:head>
 
