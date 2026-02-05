@@ -1,0 +1,9 @@
+node_modules
+build
+.svelte-kit
+.git
+.gitignore
+*.md
+*.log
+.DS_Store
+.env*
