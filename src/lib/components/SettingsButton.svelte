@@ -23,9 +23,6 @@
 
 <style>
 	.settings-button {
-		position: fixed;
-		top: 1rem;
-		right: 1rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;

@@ -1,8 +1,15 @@
-# Pomodoro Timer
+<p align="center">
+  <img src=".github/assets/ketchup icon readme.png" width="200" />
+</p>
+<h1 align="center"> Ketchup (catch-up 🥁)</h1> 
 
-A simple, playful, browser-based Pomodoro timer with Picture-in-Picture support and local persistence.
+<p align="center">A simple Pomodoro timer in your browser with Picture-in-Picture support and local persistence.</p>
 
-**Live Demo:** [timer.yamanlabs.com](https://timer.yamanlabs.com)
+<p align="center">
+  <img src=".github/assets/ketchup screenshot.png" width="500" />
+</p>
+
+<p align="center" style="font-weight: bold;">You can use it now on <a href="https://ketchup.yamanlabs.com">ketchup.yamanlabs.com</a>.</p>
 
 ## Features
 
@@ -34,8 +41,8 @@ A simple, playful, browser-based Pomodoro timer with Picture-in-Picture support 
 
 ```bash
 # Clone the repository
-git clone https://github.com/julianyaman/pomodoro-timer.git
-cd pomodoro-timer
+git clone https://github.com/julianyaman/ketchup.git
+cd ketchup
 
 # Install dependencies
 npm install
@@ -113,6 +120,8 @@ services:
 ## Attribution
 
 The Picture-in-Picture implementation using canvas-to-video streaming is inspired by [Kaiido's StackOverflow answer](https://stackoverflow.com/a/61301293) (Retrieved 2026-02-05, License: CC BY-SA 4.0).
+
+The icon background was generated using Nano Banana by Google.
 
 ## Contributing
 

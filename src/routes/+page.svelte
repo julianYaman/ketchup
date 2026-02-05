@@ -20,6 +20,7 @@
 		PipButton,
 		SettingsButton,
 		SettingsModal,
+		KeyboardShortcutsButton,
 		KeyboardShortcutsModal
 	} from '$lib/components';
 
@@ -44,6 +45,17 @@
 		return timerState.phase === 'work' ? $settings.colors.work : $settings.colors.pause;
 	});
 	const textColor = $derived($settings.colors.text);
+
+	// Dynamic page title - show timer when running or paused
+	const pageTitle = $derived.by(() => {
+		if (!timerState) return t('appTitle');
+		if (timerState.status === 'running' || timerState.status === 'paused') {
+			const time = formatTime(timerState.remainingMs);
+			const phase = timerState.phase === 'work' ? t('phaseWork') : t('phasePause');
+			return `${time} - ${phase}`;
+		}
+		return t('appTitle');
+	});
 
 	// Initialize on mount
 	onMount(() => {
@@ -199,7 +211,7 @@
 </script>
 
 <svelte:head>
-	<title>{t('appTitle')}</title>
+	<title>{pageTitle}</title>
 	<meta name="description" content="A simple, playful Pomodoro timer with Picture-in-Picture support. Have your timer always visible while you work." />
 	<script defer src="https://cloud.umami.is/script.js" data-website-id="6e2a3b0d-6caa-4ed6-acc2-2075d903214c"></script>
 </svelte:head>
@@ -227,7 +239,10 @@
 		<div class="loading">Loading...</div>
 	{/if}
 
-	<SettingsButton onclick={handleSettingsOpen} />
+	<div class="top-buttons">
+		<KeyboardShortcutsButton onclick={handleShortcutsOpen} />
+		<SettingsButton onclick={handleSettingsOpen} />
+	</div>
 	<SettingsModal open={settingsOpen} onclose={handleSettingsClose} />
 	<KeyboardShortcutsModal open={shortcutsOpen} onclose={handleShortcutsClose} />
 </main>
@@ -268,6 +283,15 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+	}
+
+	.top-buttons {
+		position: fixed;
+		top: 1rem;
+		right: 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
 	}
 
 	.loading {
