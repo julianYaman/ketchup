@@ -4,7 +4,7 @@
  */
 export const strings = {
 	// App
-	appTitle: 'Pomodoro Timer',
+	appTitle: 'Ketchup - Pomodoro Focus Timer',
 
 	// Phases
 	phaseWork: 'Work',
