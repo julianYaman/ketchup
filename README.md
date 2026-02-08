@@ -3,10 +3,10 @@
 </p>
 <h1 align="center"> Ketchup (catch-up 🥁)</h1> 
 
-<p align="center">A simple Pomodoro timer in your browser with Picture-in-Picture support and local persistence.</p>
+<p align="center">A simple Pomodoro timer. Drag and pin the timer on your desktop anywhere you want.</p>
 
 <p align="center">
-  <img src=".github/assets/ketchup screenshot.png" width="500" />
+  <img src=".github/assets/ketchup-demo.gif" width="600" />
 </p>
 
 <p align="center" style="font-weight: bold;">You can use it now on <a href="https://ketchup.yamanlabs.com">ketchup.yamanlabs.com</a>.</p>
