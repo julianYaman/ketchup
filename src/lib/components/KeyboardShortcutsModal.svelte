@@ -52,8 +52,9 @@
 	aria-modal="true"
 	onkeydown={handleKeydown}
 	onclick={handleBackdropClick}
+	onclose={onclose}
 >
-	<div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="document">
+	<div class="modal-content" onclick={(e) => e.stopPropagation()} role="document">
 		<header class="modal-header">
 			<h2 id="shortcuts-title">{t('keyboardShortcuts')}</h2>
 			<button

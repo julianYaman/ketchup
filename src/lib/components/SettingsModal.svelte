@@ -145,8 +145,9 @@
 	aria-modal="true"
 	onkeydown={handleKeydown}
 	onclick={handleBackdropClick}
+	onclose={onclose}
 >
-	<div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="document">
+	<div class="modal-content" onclick={(e) => e.stopPropagation()} role="document">
 		<header class="modal-header">
 			<h2 id="settings-title">{t('settingsTitle')}</h2>
 			<button
