@@ -12,6 +12,7 @@ export interface PipRenderer {
 	ctx: CanvasRenderingContext2D;
 	animationFrameId: number | null;
 	isActive: boolean;
+	isVideoPlaying: boolean;
 }
 
 export interface PipRenderState {
@@ -44,6 +45,7 @@ export function createPipRenderer(): PipRenderer | null {
 	const video = document.createElement('video');
 	video.muted = true;
 	video.playsInline = true;
+	video.autoplay = true;
 
 	// Set up the stream from canvas to video
 	const stream = canvas.captureStream(30); // 30fps
@@ -54,7 +56,8 @@ export function createPipRenderer(): PipRenderer | null {
 		video,
 		ctx,
 		animationFrameId: null,
-		isActive: false
+		isActive: false,
+		isVideoPlaying: false
 	};
 }
 
@@ -71,14 +74,15 @@ export function renderToCanvas(renderer: PipRenderer, state: PipRenderState): vo
 
 	// Draw time text
 	ctx.fillStyle = textColor;
-	ctx.font = 'bold 80px system-ui, -apple-system, sans-serif';
+	ctx.font = 'bold 100px system-ui, -apple-system, sans-serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillText(timeText, canvas.width / 2, canvas.height / 2);
 }
 
 /**
- * Start the PiP animation loop
+ * Start the PiP animation loop and begin video playback
+ * Video must be playing before PiP can be requested (especially for Safari)
  */
 export function startPipAnimation(
 	renderer: PipRenderer,
@@ -92,6 +96,19 @@ export function startPipAnimation(
 	};
 
 	renderer.animationFrameId = requestAnimationFrame(animate);
+
+	// Start video playback immediately so it's ready for PiP
+	// This is done outside of user gesture, but play() on muted video is allowed
+	if (!renderer.isVideoPlaying) {
+		renderer.video.play()
+			.then(() => {
+				renderer.isVideoPlaying = true;
+			})
+			.catch((err) => {
+				// Autoplay might be blocked, we'll try again on user gesture
+				console.warn('Video autoplay blocked, will retry on user interaction:', err);
+			});
+	}
 }
 
 /**
@@ -105,14 +122,42 @@ export function stopPipAnimation(renderer: PipRenderer): void {
 }
 
 /**
+ * Ensure video is playing (call this before requestPip if needed)
+ */
+async function ensureVideoPlaying(renderer: PipRenderer): Promise<boolean> {
+	if (renderer.isVideoPlaying && !renderer.video.paused) {
+		return true;
+	}
+
+	try {
+		await renderer.video.play();
+		renderer.isVideoPlaying = true;
+		return true;
+	} catch (error) {
+		console.warn('Failed to play video:', error);
+		return false;
+	}
+}
+
+/**
  * Request Picture-in-Picture mode
+ * Safari requires the PiP request to happen synchronously from a user gesture,
+ * so we ensure video is already playing before this is called.
  */
 export async function requestPip(renderer: PipRenderer): Promise<boolean> {
 	if (!isPipSupported()) return false;
 
 	try {
-		// Need to play the video first
-		await renderer.video.play();
+		// If video isn't playing yet, try to start it
+		// Note: On Safari this might fail if not from user gesture
+		if (!renderer.isVideoPlaying || renderer.video.paused) {
+			const canPlay = await ensureVideoPlaying(renderer);
+			if (!canPlay) {
+				return false;
+			}
+		}
+
+		// Request PiP - this should now work since video is already playing
 		await renderer.video.requestPictureInPicture();
 		renderer.isActive = true;
 		return true;
