@@ -9,7 +9,7 @@
   <img src=".github/assets/ketchup-demo.gif" width="600" />
 </p>
 
-<p align="center" style="font-weight: bold;">You can use it now on <a href="https://ketchup.yamanlabs.com">ketchup.yamanlabs.com</a>.</p>
+<p align="center" style="font-weight: bold;">You can use it now on <a href="https://ketchuptimer.com">ketchuptimer.com</a>.</p>
 
 ## Features
 
