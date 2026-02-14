@@ -21,7 +21,8 @@
 		SettingsButton,
 		SettingsModal,
 		KeyboardShortcutsButton,
-		KeyboardShortcutsModal
+		KeyboardShortcutsModal,
+		SkipButton
 	} from '$lib/components';
 
 	// Timer state
@@ -159,6 +160,12 @@
 		shortcutsOpen = false;
 	}
 
+	function handleSkipBreak() {
+		if (timerEngine && timerState?.phase === 'pause') {
+			timerEngine.switchToPhase('work');
+		}
+	}
+
 	// Keyboard shortcuts
 	function handleKeydown(e: KeyboardEvent) {
 		// Handle Cmd/Ctrl+K for keyboard shortcuts modal
@@ -231,6 +238,9 @@
 
 			<div class="controls">
 				<PlayPauseButton status={timerState.status} onclick={handlePlayPause} />
+				{#if timerState.phase === 'pause'}
+					<SkipButton onclick={handleSkipBreak} />
+				{/if}
 				<PipButton 
 					supported={pipSupported} 
 					active={pipActive} 

@@ -26,13 +26,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 48px;
-		height: 48px;
+		width: 72px;
+		height: 72px;
 		padding: 0;
 		color: white;
 		background: transparent;
 		border: none;
-		border-radius: 12px;
+		border-radius: 18px;
 		cursor: pointer;
 		opacity: 0.5;
 		transition: all 0.2s ease;
@@ -50,7 +50,7 @@
 	}
 
 	.shortcuts-button svg {
-		width: 24px;
-		height: 24px;
+		width: 36px;
+		height: 36px;
 	}
 </style>

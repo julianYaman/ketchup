@@ -26,6 +26,7 @@ export const strings = {
 	buttonClose: 'Close',
 	buttonSave: 'Save',
 	buttonFeedback: 'Give Feedback',
+	buttonSkip: 'Skip',
 
 	// Settings
 	settingsTitle: 'Settings',

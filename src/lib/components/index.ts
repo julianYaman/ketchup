@@ -5,3 +5,4 @@ export { default as SettingsButton } from './SettingsButton.svelte';
 export { default as SettingsModal } from './SettingsModal.svelte';
 export { default as KeyboardShortcutsButton } from './KeyboardShortcutsButton.svelte';
 export { default as KeyboardShortcutsModal } from './KeyboardShortcutsModal.svelte';
+export { default as SkipButton } from './SkipButton.svelte';
