@@ -27,6 +27,13 @@ export const strings = {
 	buttonSave: 'Save',
 	buttonFeedback: 'Give Feedback',
 	buttonSkip: 'Skip',
+	buttonTodo: 'To-Do List',
+	buttonAddTodo: 'Add Task',
+	buttonPin: 'Pin for work',
+	buttonUnpin: 'Unpin',
+	buttonDelete: 'Delete',
+	buttonMarkComplete: 'Mark as done',
+	buttonMarkIncomplete: 'Mark as undone',
 
 	// Settings
 	settingsTitle: 'Settings',
@@ -54,12 +61,22 @@ export const strings = {
 	keySDesc: 'Open Settings',
 	keyP: 'P',
 	keyPDesc: 'Toggle PiP',
+	keyT: 'T',
+	keyTDesc: 'Open To-Do List',
 	keyEscape: 'Escape',
 	keyEscapeDesc: 'Close modal',
 
 	// Messages
 	pipNotSupported: 'Picture-in-Picture is not supported in your browser.',
 	pipActive: 'Picture-in-Picture active',
+
+	// Todo
+	todoTitle: 'To-Do List',
+	todoPlaceholder: 'Add a new task...',
+	todoEmpty: 'No tasks yet. Add one above!',
+	todoPinned: 'Pinned',
+	todoPinnedTask: 'Task',
+	todoAddPlaceholder: 'What do you want to focus on?',
 } as const;
 
 export type StringKey = keyof typeof strings;

@@ -19,6 +19,7 @@ export interface PipRenderState {
 	timeText: string;
 	backgroundColor: string;
 	textColor: string;
+	pinnedTaskText?: string;
 }
 
 /**
@@ -66,18 +67,29 @@ export function createPipRenderer(): PipRenderer | null {
  */
 export function renderToCanvas(renderer: PipRenderer, state: PipRenderState): void {
 	const { ctx, canvas } = renderer;
-	const { timeText, backgroundColor, textColor } = state;
+	const { timeText, backgroundColor, textColor, pinnedTaskText } = state;
 
-	// Clear and fill background
 	ctx.fillStyle = backgroundColor;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	// Draw time text
 	ctx.fillStyle = textColor;
-	ctx.font = 'bold 100px system-ui, -apple-system, sans-serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillText(timeText, canvas.width / 2, canvas.height / 2);
+
+	if (pinnedTaskText) {
+		const timerY = canvas.height / 2 - 25;
+		ctx.font = 'bold 80px system-ui, -apple-system, sans-serif';
+		ctx.fillText(timeText, canvas.width / 2, timerY);
+
+		const taskY = canvas.height / 2 + 40;
+		ctx.font = '24px system-ui, -apple-system, sans-serif';
+		const checkmark = '✓';
+		const taskText = `${checkmark} Task: ${pinnedTaskText}`;
+		ctx.fillText(taskText, canvas.width / 2, taskY);
+	} else {
+		ctx.font = 'bold 100px system-ui, -apple-system, sans-serif';
+		ctx.fillText(timeText, canvas.width / 2, canvas.height / 2);
+	}
 }
 
 /**

@@ -39,6 +39,7 @@
 		{ key: t('keySpace'), description: t('keySpaceDesc') },
 		{ key: t('keyS'), description: t('keySDesc') },
 		{ key: t('keyP'), description: t('keyPDesc') },
+		{ key: t('keyT'), description: t('keyTDesc') },
 		{ key: 'Cmd/Ctrl + K', description: 'Show Keyboard Shortcuts' },
 		{ key: t('keyEscape'), description: t('keyEscapeDesc') }
 	];

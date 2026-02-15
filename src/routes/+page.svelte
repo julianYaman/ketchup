@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { TimerEngine, formatTime, type TimerState, type TimerConfig } from '$lib/timer';
-	import { settings, timerConfig } from '$lib/stores';
+	import { settings, timerConfig, todoStore, pinnedTodo as pinnedTodoStore, type Todo } from '$lib/stores';
 	import { 
 		isPipSupported, 
 		createPipRenderer, 
@@ -22,32 +22,33 @@
 		SettingsModal,
 		KeyboardShortcutsButton,
 		KeyboardShortcutsModal,
-		SkipButton
+		SkipButton,
+		TodoButton,
+		TodoModal,
+		PinnedTask
 	} from '$lib/components';
 
-	// Timer state
 	let timerEngine: TimerEngine | null = $state(null);
 	let timerState: TimerState | null = $state(null);
 	let currentConfig: TimerConfig | null = $state(null);
 
-	// PiP state
 	let pipRenderer: PipRenderer | null = $state(null);
 	let pipSupported = $state(false);
 	let pipActive = $state(false);
 
-	// UI state
 	let settingsOpen = $state(false);
 	let shortcutsOpen = $state(false);
+	let todoOpen = $state(false);
 	let mounted = $state(false);
 
-	// Derived values
+	let currentPinnedTodo = $derived($pinnedTodoStore);
+
 	const backgroundColor = $derived.by(() => {
 		if (!timerState) return $settings.colors.work;
 		return timerState.phase === 'work' ? $settings.colors.work : $settings.colors.pause;
 	});
 	const textColor = $derived($settings.colors.text);
 
-	// Dynamic page title - show timer when running or paused
 	const pageTitle = $derived.by(() => {
 		if (!timerState) return t('appTitle');
 		if (timerState.status === 'running' || timerState.status === 'paused') {
@@ -58,22 +59,18 @@
 		return t('appTitle');
 	});
 
-	// Initialize on mount
 	onMount(() => {
-		// Initialize settings from localStorage
 		settings.init();
+		todoStore.init();
 
-		// Create timer engine with current config
 		const config = $timerConfig;
 		currentConfig = config;
 		timerEngine = new TimerEngine(config);
 		
-		// Subscribe to timer state changes
 		const unsubscribe = timerEngine.subscribe((state) => {
 			timerState = state;
 		});
 
-		// Set up PiP
 		pipSupported = isPipSupported();
 		if (pipSupported) {
 			pipRenderer = createPipRenderer();
@@ -84,10 +81,8 @@
 					() => { pipActive = false; }
 				);
 
-				// Start PiP animation loop
 				startPipAnimation(pipRenderer, getPipRenderState);
 
-				// Store cleanup for later
 				(pipRenderer as any)._cleanupListeners = cleanupListeners;
 			}
 		}
@@ -99,7 +94,6 @@
 		};
 	});
 
-	// Update timer config when settings change
 	$effect(() => {
 		if (timerEngine && mounted) {
 			const newConfig = $timerConfig;
@@ -110,7 +104,6 @@
 		}
 	});
 
-	// Cleanup on destroy
 	onDestroy(() => {
 		if (timerEngine) {
 			timerEngine.destroy();
@@ -124,16 +117,15 @@
 		}
 	});
 
-	// Get current state for PiP rendering
 	function getPipRenderState(): PipRenderState {
 		return {
 			timeText: timerState ? formatTime(timerState.remainingMs) : '25:00',
 			backgroundColor: backgroundColor,
-			textColor: textColor
+			textColor: textColor,
+			pinnedTaskText: currentPinnedTodo?.text
 		};
 	}
 
-	// Event handlers
 	function handlePlayPause() {
 		timerEngine?.toggle();
 	}
@@ -160,15 +152,21 @@
 		shortcutsOpen = false;
 	}
 
+	function handleTodoOpen() {
+		todoOpen = true;
+	}
+
+	function handleTodoClose() {
+		todoOpen = false;
+	}
+
 	function handleSkipBreak() {
 		if (timerEngine && timerState?.phase === 'pause') {
 			timerEngine.switchToPhase('work');
 		}
 	}
 
-	// Keyboard shortcuts
 	function handleKeydown(e: KeyboardEvent) {
-		// Handle Cmd/Ctrl+K for keyboard shortcuts modal
 		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
 			e.preventDefault();
 			if (shortcutsOpen) {
@@ -179,8 +177,7 @@
 			return;
 		}
 
-		// Don't handle other shortcuts if a modal is open or if in an input
-		if ((settingsOpen || shortcutsOpen) && e.key !== 'Escape') return;
+		if ((settingsOpen || shortcutsOpen || todoOpen) && e.key !== 'Escape') return;
 		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
 		switch (e.key) {
@@ -204,6 +201,15 @@
 					handlePipToggle();
 				}
 				break;
+			case 't':
+			case 'T':
+				e.preventDefault();
+				if (todoOpen) {
+					handleTodoClose();
+				} else {
+					handleTodoOpen();
+				}
+				break;
 			case 'Escape':
 				if (settingsOpen) {
 					e.preventDefault();
@@ -211,6 +217,9 @@
 				} else if (shortcutsOpen) {
 					e.preventDefault();
 					handleShortcutsClose();
+				} else if (todoOpen) {
+					e.preventDefault();
+					handleTodoClose();
 				}
 				break;
 		}
@@ -222,7 +231,6 @@
 	<meta name="description" content="A simple Pomodoro timer. Pop out the timer into a Picture-in-Picture window to have your timer always visible while you work." />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<!-- Analytics -->
 	<script defer src="https://cloud.umami.is/script.js" data-website-id="6e2a3b0d-6caa-4ed6-acc2-2075d903214c"></script>
 </svelte:head>
 
@@ -235,6 +243,9 @@
 	{#if timerState}
 		<div class="timer-container">
 			<TimerDisplay state={timerState} {textColor} />
+			{#if currentPinnedTodo}
+				<PinnedTask todo={currentPinnedTodo} {textColor} />
+			{/if}
 
 			<div class="controls">
 				<PlayPauseButton status={timerState.status} onclick={handlePlayPause} />
@@ -256,8 +267,14 @@
 		<KeyboardShortcutsButton onclick={handleShortcutsOpen} />
 		<SettingsButton onclick={handleSettingsOpen} />
 	</div>
+
+	<div class="bottom-right-button">
+		<TodoButton onclick={handleTodoOpen} />
+	</div>
+
 	<SettingsModal open={settingsOpen} onclose={handleSettingsClose} />
 	<KeyboardShortcutsModal open={shortcutsOpen} onclose={handleShortcutsClose} />
+	<TodoModal open={todoOpen} onclose={handleTodoClose} />
 </main>
 
 <style>
@@ -305,6 +322,12 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
+	}
+
+	.bottom-right-button {
+		position: fixed;
+		bottom: 1rem;
+		right: 1rem;
 	}
 
 	.loading {

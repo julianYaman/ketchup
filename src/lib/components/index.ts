@@ -6,3 +6,6 @@ export { default as SettingsModal } from './SettingsModal.svelte';
 export { default as KeyboardShortcutsButton } from './KeyboardShortcutsButton.svelte';
 export { default as KeyboardShortcutsModal } from './KeyboardShortcutsModal.svelte';
 export { default as SkipButton } from './SkipButton.svelte';
+export { default as TodoButton } from './TodoButton.svelte';
+export { default as TodoModal } from './TodoModal.svelte';
+export { default as PinnedTask } from './PinnedTask.svelte';
