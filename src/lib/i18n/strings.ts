@@ -34,6 +34,8 @@ export const strings = {
 	buttonDelete: 'Delete',
 	buttonMarkComplete: 'Mark as done',
 	buttonMarkIncomplete: 'Mark as undone',
+	buttonViewOnGithub: 'View on GitHub',
+	buttonBuyMeACoffee: 'Support the developer',
 
 	// Settings
 	settingsTitle: 'Settings',
