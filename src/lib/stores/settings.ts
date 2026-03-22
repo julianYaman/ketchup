@@ -1,6 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { TimerConfig } from '$lib/timer';
 import { minutesToMs, validateDurationMinutes } from '$lib/timer';
+import { defaultFont, getFontStack, isAppFont, type AppFont } from '$lib/fonts';
 
 const STORAGE_KEY = 'pomodoro.settings.v1';
 
@@ -8,10 +9,12 @@ const STORAGE_KEY = 'pomodoro.settings.v1';
  * Settings schema with versioning for future migrations
  */
 export interface Settings {
-	version: 1;
+	version: 3;
 	workMinutes: number;
 	pauseMinutes: number;
 	autoStartPause: boolean;
+	enableSounds: boolean;
+	font: AppFont;
 	colors: {
 		work: string;
 		pause: string;
@@ -23,10 +26,12 @@ export interface Settings {
  * Default settings
  */
 export const defaultSettings: Settings = {
-	version: 1,
+	version: 3,
 	workMinutes: 25,
 	pauseMinutes: 5,
 	autoStartPause: true,
+	enableSounds: true,
+	font: defaultFont,
 	colors: {
 		work: '#E34234',
 		pause: '#10b981',
@@ -39,6 +44,14 @@ export const defaultSettings: Settings = {
  */
 function isValidHexColor(color: string): boolean {
 	return /^#[0-9A-Fa-f]{6}$/.test(color);
+}
+
+function normalizeStoredFont(font: unknown): AppFont {
+	if (font === 'jetbrains-mono') {
+		return 'bricolage-grotesque';
+	}
+
+	return isAppFont(font) ? font : defaultSettings.font;
 }
 
 /**
@@ -71,12 +84,19 @@ function validateSettings(stored: unknown): Settings {
 		: { ...defaultSettings.colors };
 
 	return {
-		version: 1,
+		version: 3,
 		workMinutes,
 		pauseMinutes,
 		autoStartPause: typeof s.autoStartPause === 'boolean' ? s.autoStartPause : defaultSettings.autoStartPause,
+		enableSounds: typeof s.enableSounds === 'boolean' ? s.enableSounds : defaultSettings.enableSounds,
+		font: normalizeStoredFont(s.font),
 		colors
 	};
+}
+
+function applyFontSetting(font: AppFont): void {
+	if (typeof document === 'undefined') return;
+	document.documentElement.style.setProperty('--font-primary', getFontStack(font));
 }
 
 /**
@@ -119,6 +139,12 @@ function saveSettings(settings: Settings): void {
 function createSettingsStore() {
 	const { subscribe, set, update } = writable<Settings>(defaultSettings);
 
+	function persist(updated: Settings): Settings {
+		saveSettings(updated);
+		applyFontSetting(updated.font);
+		return updated;
+	}
+
 	return {
 		subscribe,
 
@@ -127,6 +153,7 @@ function createSettingsStore() {
 		 */
 		init() {
 			const loaded = loadSettings();
+			applyFontSetting(loaded.font);
 			set(loaded);
 		},
 
@@ -136,8 +163,7 @@ function createSettingsStore() {
 		updateSetting<K extends keyof Settings>(key: K, value: Settings[K]) {
 			update(s => {
 				const updated = { ...s, [key]: value };
-				saveSettings(updated);
-				return updated;
+				return persist(updated);
 			});
 		},
 
@@ -151,8 +177,7 @@ function createSettingsStore() {
 					...s,
 					colors: { ...s.colors, [colorKey]: value }
 				};
-				saveSettings(updated);
-				return updated;
+				return persist(updated);
 			});
 		},
 
@@ -163,8 +188,7 @@ function createSettingsStore() {
 			const { clamped } = validateDurationMinutes(minutes);
 			update(s => {
 				const updated = { ...s, workMinutes: clamped };
-				saveSettings(updated);
-				return updated;
+				return persist(updated);
 			});
 		},
 
@@ -175,8 +199,7 @@ function createSettingsStore() {
 			const { clamped } = validateDurationMinutes(minutes);
 			update(s => {
 				const updated = { ...s, pauseMinutes: clamped };
-				saveSettings(updated);
-				return updated;
+				return persist(updated);
 			});
 		},
 
@@ -186,8 +209,27 @@ function createSettingsStore() {
 		setAutoStartPause(value: boolean) {
 			update(s => {
 				const updated = { ...s, autoStartPause: value };
-				saveSettings(updated);
-				return updated;
+				return persist(updated);
+			});
+		},
+
+		/**
+		 * Toggle sound effects
+		 */
+		setEnableSounds(value: boolean) {
+			update(s => {
+				const updated = { ...s, enableSounds: value };
+				return persist(updated);
+			});
+		},
+
+		/**
+		 * Update the active font family
+		 */
+		setFont(font: AppFont) {
+			update(s => {
+				const updated = { ...s, font };
+				return persist(updated);
 			});
 		},
 
@@ -196,6 +238,7 @@ function createSettingsStore() {
 		 */
 		reset() {
 			const defaults = { ...defaultSettings };
+			applyFontSetting(defaults.font);
 			saveSettings(defaults);
 			set(defaults);
 		}

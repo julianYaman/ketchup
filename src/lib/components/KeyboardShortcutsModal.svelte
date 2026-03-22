@@ -55,6 +55,7 @@
 	onclick={handleBackdropClick}
 	onclose={onclose}
 >
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div class="modal-content" onclick={(e) => e.stopPropagation()} role="document">
 		<header class="modal-header">
 			<h2 id="shortcuts-title">{t('keyboardShortcuts')}</h2>
@@ -173,9 +174,10 @@
 		justify-content: center;
 		min-width: 2.5rem;
 		padding: 0.375rem 0.75rem;
-		font-family: system-ui, -apple-system, sans-serif;
+		font-family: inherit;
 		font-size: 0.875rem;
 		font-weight: 500;
+		font-variant-numeric: tabular-nums;
 		color: #e5e7eb;
 		background: rgba(255, 255, 255, 0.1);
 		border: 1px solid rgba(255, 255, 255, 0.2);

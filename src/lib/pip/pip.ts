@@ -19,7 +19,29 @@ export interface PipRenderState {
 	timeText: string;
 	backgroundColor: string;
 	textColor: string;
+	fontFamily: string;
 	pinnedTaskText?: string;
+}
+
+function setCanvasFont(
+	ctx: CanvasRenderingContext2D,
+	fontWeight: number,
+	fontSize: number,
+	fontFamily: string
+): void {
+	ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+}
+
+function drawTimerText(
+	ctx: CanvasRenderingContext2D,
+	timeText: string,
+	centerX: number,
+	centerY: number,
+	fontSize: number,
+	fontFamily: string
+): void {
+	setCanvasFont(ctx, 700, fontSize, fontFamily);
+	ctx.fillText(timeText, centerX, centerY);
 }
 
 /**
@@ -67,7 +89,7 @@ export function createPipRenderer(): PipRenderer | null {
  */
 export function renderToCanvas(renderer: PipRenderer, state: PipRenderState): void {
 	const { ctx, canvas } = renderer;
-	const { timeText, backgroundColor, textColor, pinnedTaskText } = state;
+	const { timeText, backgroundColor, textColor, fontFamily, pinnedTaskText } = state;
 
 	ctx.fillStyle = backgroundColor;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -78,17 +100,15 @@ export function renderToCanvas(renderer: PipRenderer, state: PipRenderState): vo
 
 	if (pinnedTaskText) {
 		const timerY = canvas.height / 2 - 25;
-		ctx.font = 'bold 80px system-ui, -apple-system, sans-serif';
-		ctx.fillText(timeText, canvas.width / 2, timerY);
+		drawTimerText(ctx, timeText, canvas.width / 2, timerY, 80, fontFamily);
 
 		const taskY = canvas.height / 2 + 40;
-		ctx.font = '24px system-ui, -apple-system, sans-serif';
+		setCanvasFont(ctx, 500, 24, fontFamily);
 		const checkmark = '✓';
 		const taskText = `${checkmark} Task: ${pinnedTaskText}`;
 		ctx.fillText(taskText, canvas.width / 2, taskY);
 	} else {
-		ctx.font = 'bold 100px system-ui, -apple-system, sans-serif';
-		ctx.fillText(timeText, canvas.width / 2, canvas.height / 2);
+		drawTimerText(ctx, timeText, canvas.width / 2, canvas.height / 2, 100, fontFamily);
 	}
 }
 

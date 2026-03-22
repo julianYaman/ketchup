@@ -24,11 +24,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		width: 100%;
 		gap: 0.5rem;
 		font-size: clamp(1rem, 4vw, 1.5rem);
 		font-weight: 500;
 		padding: 0.5rem;
 		flex-wrap: wrap;
+		text-align: center;
 	}
 
 	.pinned-task svg {

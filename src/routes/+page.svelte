@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { TimerEngine, formatTime, type TimerState, type TimerConfig } from '$lib/timer';
-	import { settings, timerConfig, todoStore, pinnedTodo as pinnedTodoStore, type Todo } from '$lib/stores';
+	import { settings, timerConfig, todoStore, pinnedTodo as pinnedTodoStore, getSettings, type Todo } from '$lib/stores';
+	import { getFontStack } from '$lib/fonts';
 	import { 
 		isPipSupported, 
 		createPipRenderer, 
@@ -31,6 +32,7 @@
 	let timerEngine: TimerEngine | null = $state(null);
 	let timerState: TimerState | null = $state(null);
 	let currentConfig: TimerConfig | null = $state(null);
+	let bellAudio: HTMLAudioElement | null = $state(null);
 
 	let pipRenderer: PipRenderer | null = $state(null);
 	let pipSupported = $state(false);
@@ -62,13 +64,21 @@
 	onMount(() => {
 		settings.init();
 		todoStore.init();
+		bellAudio = new Audio('/bell.mp3');
+		bellAudio.preload = 'auto';
 
 		const config = $timerConfig;
 		currentConfig = config;
 		timerEngine = new TimerEngine(config);
+		let previousState: TimerState | null = null;
 		
 		const unsubscribe = timerEngine.subscribe((state) => {
+			if (shouldPlayPhaseBell(previousState, state)) {
+				playBell();
+			}
+
 			timerState = state;
+			previousState = state;
 		});
 
 		pipSupported = isPipSupported();
@@ -122,8 +132,22 @@
 			timeText: timerState ? formatTime(timerState.remainingMs) : '25:00',
 			backgroundColor: backgroundColor,
 			textColor: textColor,
+			fontFamily: getFontStack($settings.font),
 			pinnedTaskText: currentPinnedTodo?.text
 		};
+	}
+
+	function shouldPlayPhaseBell(previousState: TimerState | null, nextState: TimerState): boolean {
+		return previousState?.status === 'running' && nextState.status === 'finished';
+	}
+
+	function playBell() {
+		if (!getSettings().enableSounds || !bellAudio) return;
+
+		bellAudio.currentTime = 0;
+		bellAudio.play().catch(() => {
+			// Ignore blocked playback; the next user gesture will usually unlock audio.
+		});
 	}
 
 	function handlePlayPause() {
@@ -284,11 +308,19 @@
 		padding: 0;
 	}
 
+	:global(:root) {
+		--font-primary: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	}
+
 	:global(html, body) {
 		height: 100%;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		font-family: var(--font-primary);
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	}
+
+	:global(button, input, textarea, select) {
+		font: inherit;
 	}
 
 	.app {
@@ -303,15 +335,18 @@
 	}
 
 	.timer-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+		display: grid;
+		justify-items: center;
+		width: min(100%, 90rem);
+		margin: 0 auto;
 		gap: 2rem;
 	}
 
 	.controls {
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		width: 100%;
 		gap: 1rem;
 	}
 

@@ -15,11 +15,21 @@ export class TimerEngine {
 	private startTimestamp: number | null = null;
 	private elapsedBeforePause: number = 0;
 	private animationFrameId: number | null = null;
+	private completionTimeoutId: ReturnType<typeof setTimeout> | null = null;
 	private callbacks: Set<TimerCallback> = new Set();
+	private handleVisibilityChange = () => {
+		if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+			this.updateRemainingTime();
+		}
+	};
 
 	constructor(config: TimerConfig) {
 		this.config = config;
 		this.state = createInitialState(config);
+
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', this.handleVisibilityChange);
+		}
 	}
 
 	/**
@@ -75,12 +85,14 @@ export class TimerEngine {
 			this.startTimestamp = Date.now();
 			this.elapsedBeforePause = this.state.totalMs - this.state.remainingMs;
 			this.startTicking();
+			this.scheduleCompletion();
 			this.notify();
 		} else if (this.state.status === 'paused') {
 			this.state = timerReducer(this.state, { type: 'RESUME' }, this.config);
 			this.startTimestamp = Date.now();
 			// elapsedBeforePause is already set from when we paused
 			this.startTicking();
+			this.scheduleCompletion();
 			this.notify();
 		}
 	}
@@ -90,7 +102,7 @@ export class TimerEngine {
 	 */
 	pause(): void {
 		if (this.state.status === 'running') {
-			this.stopTicking();
+			this.stopActiveTiming();
 			// Calculate elapsed time and store it
 			if (this.startTimestamp !== null) {
 				const elapsed = Date.now() - this.startTimestamp;
@@ -117,7 +129,7 @@ export class TimerEngine {
 	 * Reset the timer to initial state
 	 */
 	reset(): void {
-		this.stopTicking();
+		this.stopActiveTiming();
 		this.startTimestamp = null;
 		this.elapsedBeforePause = 0;
 		this.state = timerReducer(this.state, { type: 'RESET' }, this.config);
@@ -128,7 +140,7 @@ export class TimerEngine {
 	 * Switch to a specific phase
 	 */
 	switchToPhase(phase: Phase): void {
-		this.stopTicking();
+		this.stopActiveTiming();
 		this.startTimestamp = null;
 		this.elapsedBeforePause = 0;
 		const durationMs = phase === 'work' ? this.config.workDurationMs : this.config.pauseDurationMs;
@@ -162,6 +174,42 @@ export class TimerEngine {
 			cancelAnimationFrame(this.animationFrameId);
 			this.animationFrameId = null;
 		}
+	}
+
+	/**
+	 * Clear the completion timeout.
+	 */
+	private clearCompletionSchedule(): void {
+		if (this.completionTimeoutId !== null) {
+			clearTimeout(this.completionTimeoutId);
+			this.completionTimeoutId = null;
+		}
+	}
+
+	/**
+	 * Stop all active timing mechanisms.
+	 */
+	private stopActiveTiming(): void {
+		this.stopTicking();
+		this.clearCompletionSchedule();
+	}
+
+	/**
+	 * Schedule completion based on the current remaining time.
+	 */
+	private scheduleCompletion(): void {
+		this.clearCompletionSchedule();
+		if (this.state.status !== 'running') return;
+
+		const delay = Math.max(0, this.state.remainingMs);
+		this.completionTimeoutId = setTimeout(() => {
+			this.completionTimeoutId = null;
+			this.updateRemainingTime();
+
+			if (this.state.status === 'running') {
+				this.scheduleCompletion();
+			}
+		}, delay);
 	}
 
 	/**
@@ -203,7 +251,7 @@ export class TimerEngine {
 	 * Handle completion of current phase
 	 */
 	private handlePhaseComplete(): void {
-		this.stopTicking();
+		this.stopActiveTiming();
 		this.state = timerReducer(this.state, { type: 'FINISH' }, this.config);
 		this.notify();
 
@@ -224,6 +272,7 @@ export class TimerEngine {
 			this.state = timerReducer(this.state, { type: 'START' }, this.config);
 			this.startTimestamp = Date.now();
 			this.startTicking();
+			this.scheduleCompletion();
 		}
 
 		this.notify();
@@ -233,7 +282,10 @@ export class TimerEngine {
 	 * Clean up resources
 	 */
 	destroy(): void {
-		this.stopTicking();
+		this.stopActiveTiming();
+		if (typeof document !== 'undefined') {
+			document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+		}
 		this.callbacks.clear();
 	}
 }

@@ -227,6 +227,45 @@ describe('TimerEngine', () => {
 			expect(finalRemaining).toBeLessThanOrEqual(defaultConfig.workDurationMs - 10000);
 			expect(finalRemaining).toBeGreaterThan(defaultConfig.workDurationMs - 12000);
 		});
+
+		it('completes a phase without needing an animation frame', () => {
+			vi.useFakeTimers();
+			const engine = new TimerEngine({
+				workDurationMs: 1000,
+				pauseDurationMs: 500,
+				autoStartPause: true
+			});
+
+			engine.start();
+
+			// No flushRaf call here on purpose.
+			vi.advanceTimersByTime(1000);
+
+			const state = engine.getState();
+			expect(state.phase).toBe('pause');
+			expect(state.status).toBe('running');
+			expect(state.remainingMs).toBe(500);
+		});
+
+		it('does not complete while paused even if the original timeout window passes', () => {
+			vi.useFakeTimers();
+			const engine = new TimerEngine({
+				workDurationMs: 1000,
+				pauseDurationMs: 500,
+				autoStartPause: true
+			});
+
+			engine.start();
+			vi.advanceTimersByTime(400);
+			flushRaf();
+
+			engine.pause();
+			const pausedState = engine.getState();
+
+			vi.advanceTimersByTime(5000);
+
+			expect(engine.getState()).toEqual(pausedState);
+		});
 	});
 
 	describe('cleanup', () => {

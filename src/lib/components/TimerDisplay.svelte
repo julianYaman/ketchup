@@ -30,11 +30,15 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		width: 100%;
 		gap: 0.5rem;
 		padding: 10px;
 	}
 
 	.phase-label {
+		display: block;
+		width: 100%;
+		text-align: center;
 		font-size: clamp(1rem, 4vw, 2rem);
 		font-weight: 500;
 		text-transform: uppercase;
@@ -43,6 +47,8 @@
 	}
 
 	.timer-text {
+		display: block;
+		text-align: center;
 		font-size: clamp(4rem, 25vw, 250px);
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;

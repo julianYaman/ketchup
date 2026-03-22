@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { settings, type Settings } from '$lib/stores';
+	import { settings } from '$lib/stores';
+	import { fontOptions, type AppFont } from '$lib/fonts';
 	import { t } from '$lib/i18n';
 	import { onMount } from 'svelte';
 
@@ -18,6 +19,8 @@
 	let workMinutes = $state($settings.workMinutes);
 	let pauseMinutes = $state($settings.pauseMinutes);
 	let autoStartPause = $state($settings.autoStartPause);
+	let enableSounds = $state($settings.enableSounds);
+	let font = $state($settings.font);
 	let workColor = $state($settings.colors.work);
 	let pauseColor = $state($settings.colors.pause);
 
@@ -30,6 +33,8 @@
 		workMinutes = $settings.workMinutes;
 		pauseMinutes = $settings.pauseMinutes;
 		autoStartPause = $settings.autoStartPause;
+		enableSounds = $settings.enableSounds;
+		font = $settings.font;
 		workColor = $settings.colors.work;
 		pauseColor = $settings.colors.pause;
 	});
@@ -73,6 +78,16 @@
 	function handleAutoStartChange(e: Event) {
 		autoStartPause = (e.target as HTMLInputElement).checked;
 		settings.setAutoStartPause(autoStartPause);
+	}
+
+	function handleEnableSoundsChange(e: Event) {
+		enableSounds = (e.target as HTMLInputElement).checked;
+		settings.setEnableSounds(enableSounds);
+	}
+
+	function handleFontChange(nextFont: AppFont) {
+		font = nextFont;
+		settings.setFont(nextFont);
 	}
 
 	function handleWorkColorChange(e: Event) {
@@ -151,6 +166,7 @@
 	onclick={handleBackdropClick}
 	onclose={onclose}
 >
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div class="modal-content" onclick={(e) => e.stopPropagation()} role="document">
 		<header class="modal-header">
 			<h2 id="settings-title">{t('settingsTitle')}</h2>
@@ -212,6 +228,42 @@
 					/>
 					<span>{t('settingsAutoStartPause')}</span>
 				</label>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label class="checkbox-label">
+					<input
+						type="checkbox"
+						checked={enableSounds}
+						onchange={handleEnableSoundsChange}
+					/>
+					<span>{t('settingsEnableSounds')}</span>
+				</label>
+			</div>
+
+			<div class="form-group">
+				<span class="group-label">{t('settingsFontStyle')}</span>
+				<div class="font-options" role="radiogroup" aria-label={t('settingsFontStyle')}>
+					{#each fontOptions as option}
+						<label class="font-option">
+							<input
+								class="font-radio"
+								type="radio"
+								name="font-style"
+								value={option.id}
+								checked={font === option.id}
+								onchange={() => handleFontChange(option.id)}
+							/>
+							<span class="font-option-card" style="font-family: {option.stack}">
+								<span class="font-option-label-row">
+									<span class="font-option-label">{option.label}</span>
+									<span class="font-option-family">{option.family}</span>
+								</span>
+								<span class="font-option-preview">25:00</span>
+							</span>
+						</label>
+					{/each}
+				</div>
 			</div>
 
 			<div class="form-group color-group">
@@ -363,6 +415,12 @@
 		color: #d1d5db;
 	}
 
+	.group-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #d1d5db;
+	}
+
 	.form-group input[type="number"] {
 		width: 100%;
 		padding: 0.75rem;
@@ -415,6 +473,86 @@
 	.checkbox-label span {
 		font-size: 0.875rem;
 		color: #d1d5db;
+	}
+
+	.font-options {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-auto-rows: 1fr;
+		gap: 0.75rem;
+	}
+
+	.font-option {
+		position: relative;
+		display: block;
+		cursor: pointer;
+	}
+
+	.font-radio {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	.font-option-card {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.9rem 1rem;
+		min-height: 7.75rem;
+		height: 100%;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 12px;
+		transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+	}
+
+	.font-option:hover .font-option-card {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.24);
+		transform: translateY(-1px);
+	}
+
+	.font-radio:checked + .font-option-card {
+		background: rgba(96, 165, 250, 0.14);
+		border-color: rgba(96, 165, 250, 0.7);
+		box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.25);
+	}
+
+	.font-radio:focus-visible + .font-option-card {
+		outline: 2px solid #60a5fa;
+		outline-offset: 2px;
+	}
+
+	.font-option-label-row {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.font-option-label {
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: #f9fafb;
+	}
+
+	.font-option-family {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.font-option-preview {
+		font-size: 1.6rem;
+		font-weight: 700;
+		line-height: 1;
+		color: #f9fafb;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.02em;
 	}
 
 	.color-group .color-input-wrapper {
@@ -564,5 +702,11 @@
 	.coffee-link svg {
 		width: 18px;
 		height: 18px;
+	}
+
+	@media (max-width: 480px) {
+		.font-options {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

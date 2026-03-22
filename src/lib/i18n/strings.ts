@@ -42,6 +42,8 @@ export const strings = {
 	settingsWorkDuration: 'Work Duration (minutes)',
 	settingsPauseDuration: 'Break Duration (minutes)',
 	settingsAutoStartPause: 'Auto-start break after work',
+	settingsEnableSounds: 'Enable Sounds',
+	settingsFontStyle: 'Font Style',
 	settingsWorkColor: 'Work Background Color',
 	settingsPauseColor: 'Break Background Color',
 	settingsReset: 'Reset to Defaults',
