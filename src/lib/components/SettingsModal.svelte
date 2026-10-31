@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { settings } from '$lib/stores';
-	import { fontOptions, type AppFont } from '$lib/fonts';
-	import { t } from '$lib/i18n';
+	import { settings } from '#lib/stores/index.js';
+	import { fontOptions, type AppFont } from '#lib/fonts.js';
+	import { t } from '#lib/i18n/index.js';
 	import { onMount } from 'svelte';
 
 	interface Props {

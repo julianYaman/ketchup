@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { TimerStatus } from '$lib/timer';
-	import { t } from '$lib/i18n';
+	import type { TimerStatus } from '#lib/timer/index.js';
+	import { t } from '#lib/i18n/index.js';
 
 	interface Props {
 		status: TimerStatus;

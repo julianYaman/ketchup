@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { formatTime, type TimerState } from '$lib/timer';
-	import { t } from '$lib/i18n';
+	import { formatTime, type TimerState } from '#lib/timer/index.js';
+	import { t } from '#lib/i18n/index.js';
 
 	interface Props {
 		state: TimerState;

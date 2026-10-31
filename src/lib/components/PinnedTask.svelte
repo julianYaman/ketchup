@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
-	import type { Todo } from '$lib/stores';
+	import { t } from '#lib/i18n/index.js';
+	import type { Todo } from '#lib/stores/index.js';
 
 	interface Props {
 		todo: Todo;

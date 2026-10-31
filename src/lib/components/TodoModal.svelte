@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
-	import { todoStore, type Todo } from '$lib/stores';
-	import { settings } from '$lib/stores';
+	import { t } from '#lib/i18n/index.js';
+	import { todoStore, type Todo } from '#lib/stores/index.js';
+	import { settings } from '#lib/stores/index.js';
 
 	interface Props {
 		open: boolean;
