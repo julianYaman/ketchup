@@ -1,5 +1,7 @@
 export {
 	isPipSupported,
+	getPipSupport,
+	isPipActive,
 	createPipRenderer,
 	renderToCanvas,
 	startPipAnimation,
@@ -10,5 +12,6 @@ export {
 	setupPipListeners,
 	destroyPipRenderer,
 	type PipRenderer,
-	type PipRenderState
+	type PipRenderState,
+	type PipSupport
 } from './pip';

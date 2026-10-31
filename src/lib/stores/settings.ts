@@ -1,7 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
-import type { TimerConfig } from '$lib/timer';
-import { minutesToMs, validateDurationMinutes } from '$lib/timer';
-import { defaultFont, getFontStack, isAppFont, type AppFont } from '$lib/fonts';
+import type { TimerConfig } from '#lib/timer/index.js';
+import { minutesToMs, validateDurationMinutes } from '#lib/timer/index.js';
+import { defaultFont, getFontStack, isAppFont, type AppFont } from '#lib/fonts.js';
 
 const STORAGE_KEY = 'pomodoro.settings.v1';
 

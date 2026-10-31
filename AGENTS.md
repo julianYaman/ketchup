@@ -13,7 +13,7 @@ npm run check        # svelte-kit sync + svelte-check
 npm run build        # adapter-node output in build/
 ```
 
-Node 18+ locally; Docker image uses Node 22. After timer or settings changes, run `npm test` and `npm run check`.
+Node 22.17+ locally; Docker image uses Node 22. After timer or settings changes, run `npm test` and `npm run check`.
 
 ## Layout
 
@@ -28,7 +28,7 @@ src/lib/fonts.ts            # Font ids and CSS stacks
 static/                     # Favicon, og-image, bell.mp3
 ```
 
-Import through barrel files (`$lib/timer`, `$lib/stores`, `$lib/components`, `$lib/pip`, `$lib/i18n`). Path alias `$lib` is SvelteKit’s default.
+Import through barrel files (`#lib/timer`, `#lib/stores`, `#lib/components`, `#lib/pip`, `#lib/i18n`). Path alias `#lib` is declared in `package.json` `imports`.
 
 The app is a single page. `src/routes/+layout.ts` sets `ssr = false` and `prerender = true`. Browser APIs (`localStorage`, `IndexedDB`, `document.pictureInPictureEnabled`) are not available at module load on the server — guard them, and init stores in `onMount`.
 
@@ -58,7 +58,7 @@ Phase complete flow: `FINISH` → `getNextPhaseTransition` → `SWITCH_PHASE` �
 
 **Todos** live in IndexedDB (`pomodoro-todo` / store `todos`), not localStorage. At most one incomplete todo is pinned; pinning another unpins the rest. `pinnedTodo` is the derived store the page and PiP overlay read.
 
-**Picture-in-Picture** streams a hidden canvas through a muted `<video>` (`captureStream`), then `requestPictureInPicture()`. Keep the video playing *before* the PiP request — Safari requires a playing video and a user gesture. Attribution for the canvas approach is in `src/lib/pip/pip.ts` and the README; keep it if you touch that file. PiP is optional; disable the control when `isPipSupported()` is false.
+**Picture-in-Picture** streams a canvas through a muted `<video>` (`captureStream`). Chrome/Firefox use `requestPictureInPicture()`; Safari and iOS use `webkitSetPresentationMode('picture-in-picture')` (`document.pictureInPictureEnabled` is typically false there). Keep the video in the viewport (tiny + opacity ~0.01), playing, and request PiP from a user gesture with no `await` beforehand. A 250ms paint interval keeps the overlay updating when `requestAnimationFrame` pauses in a background tab — it does not drive `remainingMs`. Attribution for the canvas approach is in `src/lib/pip/pip.ts` and the README; keep it if you touch that file. PiP is optional; disable the control when `isPipSupported()` is false.
 
 **Sounds:** `/bell.mp3` plays when status goes `running` → `finished`, if `enableSounds` is on. `play()` may reject before a user gesture — swallow that.
 

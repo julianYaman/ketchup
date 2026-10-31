@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { TimerEngine, formatTime, type TimerState, type TimerConfig } from '$lib/timer';
-	import { settings, timerConfig, todoStore, pinnedTodo as pinnedTodoStore, getSettings, type Todo } from '$lib/stores';
-	import { getFontStack } from '$lib/fonts';
+	import { TimerEngine, formatTime, type TimerState, type TimerConfig } from '#lib/timer/index.js';
+	import { settings, timerConfig, todoStore, pinnedTodo as pinnedTodoStore, getSettings, type Todo } from '#lib/stores/index.js';
+	import { getFontStack } from '#lib/fonts.js';
 	import { 
 		isPipSupported, 
 		createPipRenderer, 
@@ -13,8 +13,8 @@
 		destroyPipRenderer,
 		type PipRenderer,
 		type PipRenderState 
-	} from '$lib/pip';
-	import { t } from '$lib/i18n';
+	} from '#lib/pip/index.js';
+	import { t } from '#lib/i18n/index.js';
 	import {
 		TimerDisplay,
 		PlayPauseButton,
@@ -27,7 +27,7 @@
 		TodoButton,
 		TodoModal,
 		PinnedTask
-	} from '$lib/components';
+	} from '#lib/components/index.js';
 
 	let timerEngine: TimerEngine | null = $state(null);
 	let timerState: TimerState | null = $state(null);
